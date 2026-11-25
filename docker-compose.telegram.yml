@@ -1,0 +1,40 @@
+services:
+  php:
+    image: noir-telegram-app
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.telegram
+    environment: &production
+      APP_ENV: prod
+      APP_DEBUG: "0"
+      APP_RUNTIME_OPTIONS: '{"disable_dotenv":true}'
+      APP_SECRET: ${NOIR_APP_SECRET:?Set NOIR_APP_SECRET to a random string}
+    command: [php, -S, "0.0.0.0:8000", -t, public]
+    restart: unless-stopped
+
+  websocket:
+    image: noir-telegram-app
+    pull_policy: never
+    environment: *production
+    command: [php, bin/console, "app:websocket", "--host=0.0.0.0", "--port=8081"]
+    depends_on:
+      - php
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      NOIR_DOMAIN: ${NOIR_DOMAIN:?Set NOIR_DOMAIN to the public hostname}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/Caddyfile.telegram:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on:
+      - php
+      - websocket
+    restart: unless-stopped
+
+volumes:
+  caddy-data:

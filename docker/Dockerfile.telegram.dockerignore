@@ -1,0 +1,13 @@
+**
+!backend/composer.json
+!backend/composer.lock
+!backend/bin/**
+!backend/config/**
+!backend/public/index.php
+!backend/src/**
+!frontend/index.html
+!frontend/package.json
+!frontend/package-lock.json
+!frontend/vite.config.js
+!frontend/public/**
+!frontend/src/**

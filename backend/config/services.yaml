@@ -1,0 +1,15 @@
+parameters:
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Domain/'
+            - '../src/Kernel.php'
+
+    App\Service\GameHub:
+        shared: true

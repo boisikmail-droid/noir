@@ -1,0 +1,23 @@
+FROM node:22-bookworm AS frontend
+WORKDIR /app/frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/index.html frontend/vite.config.js ./
+COPY frontend/src ./src
+COPY frontend/public ./public
+RUN npm run build
+
+FROM php:8.3-cli-bookworm
+RUN apt-get update && apt-get install -y --no-install-recommends unzip \
+    && docker-php-ext-install sockets pcntl \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
+WORKDIR /app
+COPY backend/composer.json backend/composer.lock ./
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+COPY backend/bin ./bin
+COPY backend/config ./config
+COPY backend/public/index.php ./public/index.php
+COPY backend/src ./src
+COPY --from=frontend /app/backend/public/dist ./public/dist

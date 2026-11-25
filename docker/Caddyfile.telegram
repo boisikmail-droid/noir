@@ -1,0 +1,10 @@
+{$NOIR_DOMAIN} {
+	@socket path /ws
+	handle @socket {
+		reverse_proxy websocket:8081
+	}
+
+	handle {
+		reverse_proxy php:8000
+	}
+}
